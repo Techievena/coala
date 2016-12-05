@@ -2,6 +2,7 @@ import os
 import re
 import sys
 
+from coala_utils.string_processing import unescaped_search_for
 from coalib.collecting.Collectors import (
     collect_all_bears_from_sections, filter_section_bears_by_languages)
 from coalib.misc import Constants
@@ -132,6 +133,20 @@ def warn_config_absent(sections, argument, log_printer):
     return False
 
 
+def get_default_section(section, sections):
+    default_section = ('.'.join(section.split('.')[:-1])
+                       if unescaped_search_for('.', section) else None)
+
+    if default_section:
+        if default_section in sections:
+            return sections[default_section]
+        else:
+            sections[default_section] = Section(default_section)
+            return sections[default_section]
+
+    return sections['default']
+
+
 def load_configuration(arg_list, log_printer, arg_parser=None):
     """
     Parses the CLI args and loads the config file accordingly, taking
@@ -191,7 +206,7 @@ def load_configuration(arg_list, log_printer, arg_parser=None):
 
     for section in sections:
         if section != 'default':
-            sections[section].defaults = sections['default']
+            sections[section].defaults = get_default_section(section, sections)
 
     str_log_level = str(sections['default'].get('log_level', '')).upper()
     log_printer.log_level = LOG_LEVEL.str_dict.get(str_log_level,
