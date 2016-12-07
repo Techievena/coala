@@ -295,3 +295,7 @@ class ConfigurationGatheringTest(unittest.TestCase):
             self.assertEqual(sections['all.c']['config'],
                              sections['default']['config'])
             self.assertEqual(sections['java.test'].defaults, sections['java'])
+            self.assertEqual(str(sections['all']['ignore']), './vendor')
+            sections['default']['ignore'] = './user'
+            self.assertEqual(str(sections['all']['ignore']),
+                             './user,./vendor')
